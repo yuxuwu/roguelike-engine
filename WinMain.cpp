@@ -8,17 +8,29 @@
 #include <string>
 #include <fstream>
 
-class LevelMap {
-private:
-	std::vector<std::vector<char>> spaces;
-public:
-	LevelMap(std::string);
-};
+#include <d3d11.h>
+#pragma comment(lib, "d3d11.lib")
+#include <wrl/client.h> // For ComPtr
+#include "GameWindow.h"
 
-//std::vector<std::vector<char>> GenerateSpacesFilename(const std::string& fileName)
-std::vector<std::vector<char>> GenerateSpacesFromLevelFilename(const std::string& levelFilename)
+struct DungeonMap {
+	DungeonMap(std::vector<std::vector<char>> dungeonMap) {
+		this->dungeonMap = dungeonMap;
+	}
+	std::vector<std::vector<char>> dungeonMap;
+};
+DungeonMap GenerateDungeonMapFromString(const std::string& levelfile_as_string)
 {
-	return {{}};
+	std::vector<std::vector<char>> dungeonMap;
+	dungeonMap.emplace_back();
+	for(int i = 0; i < levelfile_as_string.size(); ++i) {
+		if(levelfile_as_string[i] == '\n') {
+			dungeonMap.emplace_back();
+		} else {
+			dungeonMap.back().emplace_back(levelfile_as_string[i]);
+		}
+	}
+	return DungeonMap(dungeonMap);
 }
 
 std::string importFileToString(std::string filename) {
@@ -35,55 +47,96 @@ std::string importFileToString(std::string filename) {
 	return result;
 }
 
-LevelMap::LevelMap(std::string levelFilename){
-	/// Readfile into level
-	this->spaces = GenerateSpacesFromLevelFilename(levelFilename);
-}
 
-
-
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 {
-	/// Register the window class.
-	const wchar_t CLASS_NAME[]  = L"Sample Window Class";
+	GameWindow gameWindow;
+	HWND hwnd = gameWindow.setupWindow(hInstance);
 
-	WNDCLASS wc = { };
-	wc.lpfnWndProc   = WindowProc;
-	wc.hInstance     = hInstance;
-	wc.lpszClassName = CLASS_NAME;
+	//GameGraphics gameGraphics;
+	//gameGraphics.setupGraphics();
 
-	RegisterClass(&wc);
+	/*
+	/// Get references to Direct3D Device and Context
+	UINT deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#if defined(DEBUG) || defined(_DEBUG)
+	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
 
-	// Create the window.
-	HWND hwnd = CreateWindowEx(
-			0,                              // Optional window styles.
-			CLASS_NAME,                     // Window class
-			L"Learn to Program Windows",    // Window text
-			WS_OVERLAPPEDWINDOW,            // Window style
+	D3D_FEATURE_LEVEL levels[] = {
+			D3D_FEATURE_LEVEL_9_1,
+			D3D_FEATURE_LEVEL_9_2,
+			D3D_FEATURE_LEVEL_9_3,
+			D3D_FEATURE_LEVEL_10_0,
+			D3D_FEATURE_LEVEL_10_1,
+			D3D_FEATURE_LEVEL_11_0,
+			D3D_FEATURE_LEVEL_11_1
+	};
 
-			// Size and position
-			CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+	Microsoft::WRL::ComPtr<ID3D11Device> device;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+	D3D_FEATURE_LEVEL featureLevel;
 
-			NULL,       // Parent window
-			NULL,       // Menu
-			hInstance,  // Instance handle
-			NULL        // Additional application data
-	);
+	UINT hr = D3D11CreateDevice(
+			nullptr,
+			D3D_DRIVER_TYPE_HARDWARE,
+			0,
+			deviceFlags,
+			levels,
+			ARRAYSIZE(levels),
+			D3D11_SDK_VERSION,
+			&device,
+			&featureLevel,
+			&context
+			);
 
-	if (hwnd == NULL)
-	{
-		return 0;
+	if (FAILED(hr)) {
+		std::cout << "Failed to create D3D11 Device" << std::endl;
+		return -1;
 	}
 
+	/// Create Swap Chain
+	DXGI_SWAP_CHAIN_DESC desc;
+	ZeroMemory(&desc, sizeof(DXGI_SWAP_CHAIN_DESC));
+	desc.Windowed = TRUE;
+	desc.BufferCount = 2;
+	desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+	desc.OutputWindow = hwnd;
+
+	Microsoft::WRL::ComPtr<IDXGIDevice3> dxgiDevice;
+	Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+	Microsoft::WRL::ComPtr<IDXGIFactory> factory;
+
+	hr = dxgiDevice->GetAdapter(&adapter);
+	 */
+
 	ShowWindow(hwnd, nCmdShow);
-	// Run the message loop.
-	MSG msg = {};
-	while (GetMessage(&msg, NULL, 0, 0))
+
+	/// Main Loop
+	MSG msg;
+	bool bGotMsg;
+	msg.message = WM_NULL;
+	PeekMessage(&msg, NULL, 0U, 0U, PM_NOREMOVE);
+	while (WM_QUIT != msg.message)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		// Process window events first
+		// Use PeekMessage() so we can use idle time to render the scene.
+		bGotMsg = (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0);
+
+		if (bGotMsg) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		} else {
+			// Update the scene
+
+			// Render during idle time (when no window messages are waiting)
+			// Present frame to screen
+		}
 	}
 
 	return 0;
