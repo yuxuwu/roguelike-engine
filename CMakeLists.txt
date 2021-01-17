@@ -7,8 +7,10 @@ add_subdirectory("googletest")
 include_directories("googletest/googletest/include")
 include_directories("googletest/googlemock/include")
 
-add_executable(roguelike_engine WIN32 WinMain.cpp GameWindow.cpp GameWindow.h)
-add_executable(unit_tests Tests.cpp)
+set(SOURCE_FILES WinMain.cpp GameWindow.cpp utils/FileHandling.cpp DungeonMap.cpp)
+
+add_executable(roguelike_engine WIN32 ${SOURCE_FILES})
+add_executable(unit_tests Tests.cpp ${SOURCE_FILES})
 
 target_link_libraries(unit_tests LINK_PUBLIC gtest_main gtest)
 

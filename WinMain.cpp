@@ -6,46 +6,14 @@
 #include <windows.h>
 #include <vector>
 #include <string>
-#include <fstream>
 
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
 #include <wrl/client.h> // For ComPtr
 #include "GameWindow.h"
+#include "DungeonMap.h"
 
-struct DungeonMap {
-	DungeonMap(std::vector<std::vector<char>> dungeonMap) {
-		this->dungeonMap = dungeonMap;
-	}
-	std::vector<std::vector<char>> dungeonMap;
-};
-DungeonMap GenerateDungeonMapFromString(const std::string& levelfile_as_string)
-{
-	std::vector<std::vector<char>> dungeonMap;
-	dungeonMap.emplace_back();
-	for(int i = 0; i < levelfile_as_string.size(); ++i) {
-		if(levelfile_as_string[i] == '\n') {
-			dungeonMap.emplace_back();
-		} else {
-			dungeonMap.back().emplace_back(levelfile_as_string[i]);
-		}
-	}
-	return DungeonMap(dungeonMap);
-}
 
-std::string importFileToString(std::string filename) {
-	std::string result;
-	std::ifstream fileStream(filename);
-
-	if(fileStream.is_open()){
-		result = std::string(
-				(std::istreambuf_iterator<char>(fileStream)),
-				(std::istreambuf_iterator<char>()));
-		fileStream.close();
-	}
-
-	return result;
-}
 
 
 
