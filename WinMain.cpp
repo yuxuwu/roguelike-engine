@@ -2,86 +2,23 @@
 #define UNICODE
 #endif
 
-#include <iostream>
 #include <windows.h>
-#include <vector>
-#include <string>
-
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
-#include <wrl/client.h> // For ComPtr
+
 #include "GameWindow.h"
-#include "DungeonMap.h"
-
-
-
+#include "GameGraphics.h"
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 {
 	GameWindow gameWindow;
-	HWND hwnd = gameWindow.setupWindow(hInstance);
+	gameWindow.setupWindow(hInstance);
+	HWND hwnd = gameWindow.getWindowHandler();
 
-	//GameGraphics gameGraphics;
-	//gameGraphics.setupGraphics();
+	GameGraphics gameGraphics;
+	gameGraphics.setupGraphics(hwnd);
 
-	/*
-	/// Get references to Direct3D Device and Context
-	UINT deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-#if defined(DEBUG) || defined(_DEBUG)
-	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-	D3D_FEATURE_LEVEL levels[] = {
-			D3D_FEATURE_LEVEL_9_1,
-			D3D_FEATURE_LEVEL_9_2,
-			D3D_FEATURE_LEVEL_9_3,
-			D3D_FEATURE_LEVEL_10_0,
-			D3D_FEATURE_LEVEL_10_1,
-			D3D_FEATURE_LEVEL_11_0,
-			D3D_FEATURE_LEVEL_11_1
-	};
-
-	Microsoft::WRL::ComPtr<ID3D11Device> device;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
-	D3D_FEATURE_LEVEL featureLevel;
-
-	UINT hr = D3D11CreateDevice(
-			nullptr,
-			D3D_DRIVER_TYPE_HARDWARE,
-			0,
-			deviceFlags,
-			levels,
-			ARRAYSIZE(levels),
-			D3D11_SDK_VERSION,
-			&device,
-			&featureLevel,
-			&context
-			);
-
-	if (FAILED(hr)) {
-		std::cout << "Failed to create D3D11 Device" << std::endl;
-		return -1;
-	}
-
-	/// Create Swap Chain
-	DXGI_SWAP_CHAIN_DESC desc;
-	ZeroMemory(&desc, sizeof(DXGI_SWAP_CHAIN_DESC));
-	desc.Windowed = TRUE;
-	desc.BufferCount = 2;
-	desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-	desc.OutputWindow = hwnd;
-
-	Microsoft::WRL::ComPtr<IDXGIDevice3> dxgiDevice;
-	Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-	Microsoft::WRL::ComPtr<IDXGIFactory> factory;
-
-	hr = dxgiDevice->GetAdapter(&adapter);
-	 */
 
 	ShowWindow(hwnd, nCmdShow);
 

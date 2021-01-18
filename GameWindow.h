@@ -14,7 +14,11 @@
 
 class GameWindow {
 public:
-	HWND setupWindow(HINSTANCE);
+	void setupWindow(HINSTANCE);
+	HWND getWindowHandler();
+
+private:
+	HWND windowHandler;
 };
 
 

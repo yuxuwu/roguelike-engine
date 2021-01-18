@@ -7,7 +7,7 @@
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-HWND GameWindow::setupWindow(HINSTANCE hInstance) {
+void GameWindow::setupWindow(HINSTANCE hInstance) {
 	/// Register the window class.
 	const wchar_t CLASS_NAME[]  = L"Sample Window Class";
 
@@ -39,5 +39,9 @@ HWND GameWindow::setupWindow(HINSTANCE hInstance) {
 		std::cout << "Window not created" << std::endl;
 	}
 
-	return hwnd;
+	this->windowHandler = hwnd;
+}
+
+HWND GameWindow::getWindowHandler() {
+	return this->windowHandler;
 }
