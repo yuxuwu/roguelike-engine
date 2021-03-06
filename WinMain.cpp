@@ -3,15 +3,24 @@
 #endif
 
 #include <windows.h>
-#include <d3d11.h>
+#include <cstdio>
+
 #pragma comment(lib, "d3d11.lib")
 
 #include "GameWindow.h"
 #include "GameGraphics.h"
 
+#include <iostream>
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 {
+	// Create and redirect output to console
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	HWND console_hwnd = GetConsoleWindow();
+
+
 	GameWindow gameWindow;
 	gameWindow.setupWindow(hInstance);
 	HWND hwnd = gameWindow.getWindowHandler();
@@ -19,6 +28,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 	GameGraphics gameGraphics;
 	gameGraphics.setupGraphics(hwnd);
 
+	gameGraphics.loadAndCompileShader();
 
 	ShowWindow(hwnd, nCmdShow);
 
@@ -38,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 			DispatchMessage(&msg);
 		} else {
 			// Update the scene
-
+			gameGraphics.renderFrame();
 			// Render during idle time (when no window messages are waiting)
 			// Present frame to screen
 		}

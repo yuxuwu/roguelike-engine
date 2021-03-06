@@ -10,69 +10,102 @@
 #include "utils/WindowsTest.h"
 
 #include <windows.h>
-#include <d3d11.h>
-#pragma comment(lib, "d3d11.lib")
-#include <wrl/client.h>
 
 #include <iostream>
 
 
 void GameGraphics::setupGraphics(const HWND& hwnd) {
-	_setupD3DDeviceAndContext();
-	_setupD3DSwapChain(hwnd);
+	_setupD3DDeviceAndSwapChain(hwnd);
+	_setupRenderTargets();
+	_setupViewport();
 }
 
-void GameGraphics::_setupD3DDeviceAndContext() {
+void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 	UINT deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if defined(DEBUG) || defined(_DEBUG)
 	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-	D3D_FEATURE_LEVEL levels[] = {
-			D3D_FEATURE_LEVEL_9_1,
-			D3D_FEATURE_LEVEL_9_2,
-			D3D_FEATURE_LEVEL_9_3,
-			D3D_FEATURE_LEVEL_10_0,
-			D3D_FEATURE_LEVEL_10_1,
-			D3D_FEATURE_LEVEL_11_0,
-			D3D_FEATURE_LEVEL_11_1
-	};
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+	swapChainDesc.Windowed = TRUE;
+	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+	swapChainDesc.OutputWindow = hwnd;
 
-	Microsoft::WRL::ComPtr<ID3D11Device> device;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
-	D3D_FEATURE_LEVEL featureLevel;
-
-	WindowsTest::debug(D3D11CreateDevice(
-			nullptr,
-			D3D_DRIVER_TYPE_HARDWARE,
-			0,
-			deviceFlags,
-			levels,
-			ARRAYSIZE(levels),
-			D3D11_SDK_VERSION,
-			&device,
-			&featureLevel,
-			&context
-	));
+	WindowsTest::debug(
+			//OPT: Creating device and swap chain recreates device resources
+			//     for the swap chain, more efficient to create separately from
+			//     device itself.
+			D3D11CreateDeviceAndSwapChain(
+					nullptr,
+					D3D_DRIVER_TYPE_HARDWARE,
+					0,
+					deviceFlags,
+					_levels,
+					ARRAYSIZE(_levels),
+					D3D11_SDK_VERSION,
+					&swapChainDesc,
+					&(_d3dSwapChain),
+					&(_d3dDevice),
+					&(_d3dFeatureLevel),
+					&(_d3dContext)
+			)
+	);
 }
 
-void GameGraphics::_setupD3DSwapChain(const HWND& hwnd) {
-	DXGI_SWAP_CHAIN_DESC desc;
-	ZeroMemory(&desc, sizeof(DXGI_SWAP_CHAIN_DESC));
-	desc.Windowed = TRUE;
-	desc.BufferCount = 2;
-	desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-	desc.OutputWindow = hwnd;
+void GameGraphics::_setupRenderTargets() {
+	Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer;
+	_d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.ReleaseAndGetAddressOf()));
+	_d3dDevice->CreateRenderTargetView(backBuffer.Get(), NULL, _backBuffer.ReleaseAndGetAddressOf());
+	_d3dContext->OMSetRenderTargets(1, _backBuffer.GetAddressOf(), NULL);
+}
 
+void GameGraphics::_setupViewport() {
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = 800;
+	viewport.Height = 600;
+
+	_d3dContext->RSSetViewports(1, &viewport);
+}
+
+void GameGraphics::renderFrame() {
+	_clearRenderingTarget();
+
+	_d3dSwapChain->Present(0, 0);
+}
+
+void GameGraphics::_clearRenderingTarget() {
+	float color[4] = {0.0f, 0.2f, 0.4f, 1.0f};
+	_d3dContext->ClearRenderTargetView(_backBuffer.Get(), color);
+
+}
+
+void GameGraphics::loadAndCompileShader() {
+	ID3DBlob *VS, *PS;
 	/*
-	Microsoft::WRL::ComPtr<IDXGIDevice3> dxgiDevice;
-	Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-	Microsoft::WRL::ComPtr<IDXGIFactory> factory;
+	WindowsTest::debug(
+			D3DCompileFromFile(L"shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, 0)
+	);
+	D3DCompileFromFile(L"shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0);
+
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPS;
+	_d3dDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, pVS.GetAddressOf());
+	_d3dDevice->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, pPS.GetAddressOf());
+
+	_d3dContext->VSSetShader(pVS.Get(), 0, 0);
+	_d3dContext->PSSetShader(pPS.Get(), 0, 0);
+
 	 */
 
-	//hr = dxgiDevice->GetAdapter(&adapter);
 }
