@@ -2,6 +2,11 @@
 #include <sstream>
 #include "WindowsErrorHandling.h"
 
+/*
+ * TODO: Should make these macros, since macros allow you
+ *       to get the line # and file
+ */
+
 static std::wstring GetHResultDescription(UINT);
 static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob*);
 
@@ -14,7 +19,6 @@ void WindowsErrorHandling::DEBUGCheckOK(HRESULT hr) {
 
 void WindowsErrorHandling::DEBUGCheckShaderOK(HRESULT hr, ID3D10Blob* errorBlob) {
 	DEBUGCheckOK(hr);
-
 	std::wcout << GetShaderCompilerErrorMessage(errorBlob) << std::endl;
 }
 
