@@ -5,13 +5,13 @@
 #define UNICODE
 #endif
 
-
 #include "GameGraphics.h"
-#include "utils/WindowsTest.h"
+#include "utils/WindowsErrorHandling.h"
 
 #include <windows.h>
 
 #include <iostream>
+
 
 
 void GameGraphics::setupGraphics(const HWND& hwnd) {
@@ -37,7 +37,7 @@ void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	swapChainDesc.OutputWindow = hwnd;
 
-	WindowsTest::debug(
+	WindowsErrorHandling::DEBUGCheckOK(
 			//OPT: Creating device and swap chain recreates device resources
 			//     for the swap chain, more efficient to create separately from
 			//     device itself.
@@ -90,14 +90,22 @@ void GameGraphics::_clearRenderingTarget() {
 }
 
 void GameGraphics::loadAndCompileShader() {
-	ID3DBlob *VS, *PS;
-	/*
-	WindowsTest::debug(
-			D3DCompileFromFile(L"shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, 0)
+	ID3DBlob *VS = nullptr, *PS = nullptr;
+
+	ID3D10Blob *errorCode = nullptr;
+	WindowsErrorHandling::DEBUGCheckShaderOK(
+		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorCode),
+		errorCode
 	);
-	D3DCompileFromFile(L"shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0);
 
+	// TODO: re-using "errorCode" is ugly, not enough modularity, separate VS and PS functions
+	errorCode = nullptr;
+	WindowsErrorHandling::DEBUGCheckShaderOK(
+		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &errorCode),
+		errorCode
+	);
 
+	/*
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPS;
 	_d3dDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, pVS.GetAddressOf());
