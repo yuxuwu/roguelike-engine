@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <string>
 #include "WindowsErrorHandling.h"
 
 /*
@@ -7,19 +8,22 @@
  *       to get the line # and file
  */
 
+using namespace WindowsErrorHandling;
+
 static std::wstring GetHResultDescription(UINT);
 static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob*);
 
-void WindowsErrorHandling::DEBUGCheckOK(HRESULT hr) {
+ComResult WindowsErrorHandling::DEBUGCheckWindowsCallOK(HRESULT hr) {
 	if(FAILED(hr)) {
-		std::cout << "Call Failed" << std::endl;
-		std::wcout << GetHResultDescription(hr) << std::endl;
+		return {ComResult::Status::FAILURE, GetHResultDescription(hr)};
 	}
+	return {ComResult::Status::SUCCESS, L""};
 }
 
-void WindowsErrorHandling::DEBUGCheckShaderOK(HRESULT hr, ID3D10Blob* errorBlob) {
-	DEBUGCheckOK(hr);
+ComResult WindowsErrorHandling::DEBUGCheckShaderOK(HRESULT hr, ID3D10Blob* errorBlob) {
+	DEBUGCheckWindowsCallOK(hr);
 	std::wcout << GetShaderCompilerErrorMessage(errorBlob) << std::endl;
+	return {ComResult::Status::FAILURE, L""};
 }
 
 static std::wstring GetHResultDescription(UINT hr) {
