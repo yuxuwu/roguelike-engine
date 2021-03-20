@@ -13,17 +13,11 @@ using namespace WindowsErrorHandling;
 static std::wstring GetHResultDescription(UINT);
 static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob*);
 
-ComResult WindowsErrorHandling::DEBUGCheckWindowsCallOK(HRESULT hr) {
+ComStatus WindowsErrorHandling::GetHRStatus(HRESULT hr) {
 	if(FAILED(hr)) {
-		return {ComResult::Status::FAILURE, GetHResultDescription(hr)};
+		return {ComStatus::Status::FAILURE, GetHResultDescription(hr)};
 	}
-	return {ComResult::Status::SUCCESS, L""};
-}
-
-ComResult WindowsErrorHandling::DEBUGCheckShaderOK(HRESULT hr, ID3D10Blob* errorBlob) {
-	DEBUGCheckWindowsCallOK(hr);
-	std::wcout << GetShaderCompilerErrorMessage(errorBlob) << std::endl;
-	return {ComResult::Status::FAILURE, L""};
+	return {ComStatus::Status::SUCCESS, L""};
 }
 
 static std::wstring GetHResultDescription(UINT hr) {
@@ -56,19 +50,3 @@ static std::wstring GetHResultDescription(UINT hr) {
 	return result;
 }
 
-static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob *errorBlob) {
-	std::wstring result{};
-
-	if(errorBlob){
-		char* compileErrors = (char*)errorBlob->GetBufferPointer();
-
-		std::wstringstream resultString{};
-		resultString << "There was a shader compilation error" << std::endl;
-		resultString << compileErrors << std::endl;
-
-		result = resultString.str();
-		errorBlob->Release();
-	}
-
-	return result;
-}

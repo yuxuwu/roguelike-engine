@@ -24,8 +24,8 @@ include_directories("googletest/googletest/include")
 include_directories("googletest/googlemock/include")
 
 set(TEST_FILES
-        Tests.cpp
-        utils/WindowsErrorHandlingTest.cpp
+        tests/Tests.cpp
+        tests/utils/WindowsErrorHandlingTest.cpp
         )
 add_executable(unit_tests ${SOURCE_FILES} ${TEST_FILES})
 add_custom_target(copy_testfiles

@@ -37,7 +37,7 @@ void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	swapChainDesc.OutputWindow = hwnd;
 
-	WindowsErrorHandling::DEBUGCheckOK(
+	WindowsErrorHandling::GetHRStatus(
 			//OPT: Creating device and swap chain recreates device resources
 			//     for the swap chain, more efficient to create separately from
 			//     device itself.
@@ -89,21 +89,34 @@ void GameGraphics::_clearRenderingTarget() {
 
 }
 
+/*
+static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob *errorBlob) {
+	std::wstring result{};
+
+	if(errorBlob){
+		char* compileErrors = (char*)errorBlob->GetBufferPointer();
+
+		std::wstringstream resultString{};
+		resultString << "There was a shader compilation error" << std::endl;
+		resultString << compileErrors << std::endl;
+
+		result = resultString.str();
+		errorBlob->Release();
+	}
+
+	return result;
+}
+*/
+
 void GameGraphics::loadAndCompileShader() {
 	ID3DBlob *VS = nullptr, *PS = nullptr;
 
 	ID3D10Blob *errorCode = nullptr;
-	WindowsErrorHandling::DEBUGCheckShaderOK(
-		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorCode),
-		errorCode
-	);
+	WindowsErrorHandling::GetHRStatus(D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorCode));
 
 	// TODO: re-using "errorCode" is ugly, not enough modularity, separate VS and PS functions
 	errorCode = nullptr;
-	WindowsErrorHandling::DEBUGCheckShaderOK(
-		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &errorCode),
-		errorCode
-	);
+	WindowsErrorHandling::GetHRStatus(D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &errorCode));
 
 	/*
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "utils/FileHandling.h"
-#include "DungeonMap.h"
+#include "../utils/FileHandling.h"
+#include "../DungeonMap.h"
 
 #include <string>
 #include <vector>
@@ -41,8 +41,3 @@ TEST (FileImports_DungeonMap, CreateDungeonFromSymbolsWorks) {
 	EXPECT_EQ(output, result);
 }
 */
-
-int main(int argc, char **argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
