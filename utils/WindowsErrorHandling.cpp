@@ -11,7 +11,6 @@
 using namespace WindowsErrorHandling;
 
 static std::wstring GetHResultDescription(UINT);
-static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob*);
 
 ComStatus WindowsErrorHandling::GetHRStatus(HRESULT hr) {
 	if(FAILED(hr)) {

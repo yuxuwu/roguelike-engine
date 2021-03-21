@@ -12,7 +12,7 @@
 #define DEBUG_HR(hr) { \
 	::WindowsErrorHandling::ComStatus status = ::WindowsErrorHandling::GetHRStatus(hr); \
 	if(status.status == ::WindowsErrorHandling::ComStatus::Status::FAILURE){            \
-    	std::wcout << L"On line " << __LINE__ << L"in file " << __FILE__ << std::endl;  \
+    	std::wcout << L"DEBUG_HR: On line " << __LINE__ << L" in file " << __FILE__ << std::endl;  \
 		std::wcout << status.message << std::endl;                                      \
 	}                                                                                   \
 }

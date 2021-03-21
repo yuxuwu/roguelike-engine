@@ -37,7 +37,7 @@ void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	swapChainDesc.OutputWindow = hwnd;
 
-	WindowsErrorHandling::GetHRStatus(
+	DEBUG_HR(
 			//OPT: Creating device and swap chain recreates device resources
 			//     for the swap chain, more efficient to create separately from
 			//     device itself.
@@ -89,46 +89,26 @@ void GameGraphics::_clearRenderingTarget() {
 
 }
 
-/*
-static std::wstring GetShaderCompilerErrorMessage(ID3D10Blob *errorBlob) {
-	std::wstring result{};
-
-	if(errorBlob){
-		char* compileErrors = (char*)errorBlob->GetBufferPointer();
-
-		std::wstringstream resultString{};
-		resultString << "There was a shader compilation error" << std::endl;
-		resultString << compileErrors << std::endl;
-
-		result = resultString.str();
-		errorBlob->Release();
-	}
-
-	return result;
-}
-*/
-
-void GameGraphics::loadAndCompileShader() {
-	ID3DBlob *VS = nullptr, *PS = nullptr;
-
-	ID3D10Blob *errorCode = nullptr;
-	DEBUG_HR(
-		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorCode)
-	);
-
-	// TODO: re-using "errorCode" is ugly, not enough modularity, separate VS and PS functions
-	errorCode = nullptr;
-	DEBUG_HR(
-		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &errorCode)
-	);
 
 
+void GameGraphics::loadAndCompileTestShader() {
+	/*
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPS;
-	_d3dDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, pVS.GetAddressOf());
-	_d3dDevice->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, pPS.GetAddressOf());
+	_d3dDevice->CreateVertexShader(
+		VS->GetBufferPointer(),
+		VS->GetBufferSize(),
+		NULL,
+		pVS.GetAddressOf()
+	);
+	_d3dDevice->CreatePixelShader(
+		PS->GetBufferPointer(),
+		PS->GetBufferSize(),
+		NULL,
+		pPS.GetAddressOf()
+	);
 
 	_d3dContext->VSSetShader(pVS.Get(), 0, 0);
 	_d3dContext->PSSetShader(pPS.Get(), 0, 0);
-
+	 */
 }

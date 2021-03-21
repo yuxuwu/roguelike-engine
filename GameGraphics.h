@@ -34,7 +34,7 @@ private:
 public:
 	void setupGraphics(const HWND& hwnd);
 	void renderFrame();
-	void loadAndCompileShader();
+	void loadAndCompileTestShader();
 private:
 	void _setupD3DDeviceAndSwapChain(const HWND &hwnd);
 	void _setupRenderTargets();
