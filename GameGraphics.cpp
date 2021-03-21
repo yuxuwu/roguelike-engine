@@ -112,13 +112,17 @@ void GameGraphics::loadAndCompileShader() {
 	ID3DBlob *VS = nullptr, *PS = nullptr;
 
 	ID3D10Blob *errorCode = nullptr;
-	WindowsErrorHandling::GetHRStatus(D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorCode));
+	DEBUG_HR(
+		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &errorCode)
+	);
 
 	// TODO: re-using "errorCode" is ugly, not enough modularity, separate VS and PS functions
 	errorCode = nullptr;
-	WindowsErrorHandling::GetHRStatus(D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &errorCode));
+	DEBUG_HR(
+		D3DCompileFromFile(L"testfiles/shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &errorCode)
+	);
 
-	/*
+
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPS;
 	_d3dDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, pVS.GetAddressOf());
@@ -126,7 +130,5 @@ void GameGraphics::loadAndCompileShader() {
 
 	_d3dContext->VSSetShader(pVS.Get(), 0, 0);
 	_d3dContext->PSSetShader(pPS.Get(), 0, 0);
-
-	 */
 
 }
