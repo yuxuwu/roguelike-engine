@@ -7,7 +7,7 @@
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-void GameWindow::setupWindow(HINSTANCE hInstance) {
+void GameWindow::registerAndCreateWindow(HINSTANCE hInstance) {
 	/// Register the window class.
 	const wchar_t CLASS_NAME[]  = L"Sample Window Class";
 

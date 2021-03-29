@@ -1,7 +1,3 @@
-//
-// Created by Yu on 1/17/2021.
-//
-
 #ifndef ROGUELIKE_ENGINE_DUNGEONMAP_H
 #define ROGUELIKE_ENGINE_DUNGEONMAP_H
 
