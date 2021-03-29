@@ -2,6 +2,30 @@
 #include <sstream>
 #include "../utils/WindowsErrorHandling.h"
 
+static std::string ParseStringFromErrorBlob(ID3DBlob *errorBlob);
+static std::string GetCompilationTarget(Shader::Type type);
+static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob* compileErrors);
+static std::string CreateShaderCompileMessage(ID3DBlob* compileErrors);
+
+// TODO: Don't feel like passing in a shader blob object, should create one and return it
+Shader::ShaderCompileResult Shader::Compile(ID3DBlob* shader, const std::wstring& filepath, const std::string& entrypoint, Shader::Type shaderType) {
+	ID3DBlob *compileErrors = nullptr;
+	DEBUG_HR(
+		D3DCompileFromFile(
+				filepath.c_str(),                         // filename
+				nullptr,                                  // define shader macros (optional)
+				nullptr,                                  // shader include files (optional)
+				entrypoint.c_str(),                       // shader entry point function
+				GetCompilationTarget(shaderType).c_str(), // compilation target
+				0,                                        // compile options bitfield (optional)
+				0,                                        // compile options 2 bitfield (optional)
+				&shader,                                  // p to compiled code
+				&compileErrors)                           // p to error msgs, NULL if no errors (optional)
+	);
+
+	return CreateShaderCompileResult(compileErrors);
+}
+
 static std::string ParseStringFromErrorBlob(ID3DBlob *errorBlob) {
 	std::string result = (char*)errorBlob->GetBufferPointer();
 	return result;
@@ -22,32 +46,21 @@ static std::string GetCompilationTarget(Shader::Type type) {
 }
 
 static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob* compileErrors) {
-	if(compileErrors){
-		std::string compileErrorMessage("");
-		compileErrorMessage = "A compile error was found for the shader: " +
-							  ParseStringFromErrorBlob(compileErrors);
-		compileErrors->Release();
-		return {Shader::ShaderCompileResult::Status::FAILURE, compileErrorMessage};
-	} else {
+	std::string compileErrorMessage = CreateShaderCompileMessage(compileErrors);
+
+	if (empty(compileErrorMessage)) {
 		return {Shader::ShaderCompileResult::Status::SUCCESS, ""};
 	}
+	return {Shader::ShaderCompileResult::Status::FAILURE, compileErrorMessage};
 }
 
-// TODO: Don't feel like passing in a shader blob object, should create one and return it
-Shader::ShaderCompileResult Shader::Compile(ID3DBlob* shader, std::wstring filepath, std::string entrypoint, Shader::Type shaderType) {
-	ID3DBlob *compileErrors = nullptr;
-	DEBUG_HR(
-		D3DCompileFromFile(
-				filepath.c_str(),                         // filename
-				nullptr,                                  // define shader macros (optional)
-				nullptr,                                  // shader include files (optional)
-				entrypoint.c_str(),                       // shader entry point function
-				GetCompilationTarget(shaderType).c_str(), // compilation target
-				0,                                        // compile options bitfield (optional)
-				0,                                        // compile options 2 bitfield (optional)
-				&shader,                                  // p to compiled code
-				&compileErrors)                           // p to error msgs, NULL if no errors (optional)
-	);
+static std::string CreateShaderCompileMessage(ID3DBlob* compileErrors) {
+	std::string result{};
 
-	return CreateShaderCompileResult(compileErrors);
+	if(compileErrors) {
+		result = "A compile error was found for the shader: " +
+				  ParseStringFromErrorBlob(compileErrors);
+		compileErrors->Release();
+	}
+	return result;
 }

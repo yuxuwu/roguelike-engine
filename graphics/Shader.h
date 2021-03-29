@@ -15,7 +15,7 @@ public:
 	};
 	enum class Type {Vertex, Fragment};
 
-	static ShaderCompileResult Compile(ID3DBlob*, std::wstring, std::string, Type);
+	static ShaderCompileResult Compile(ID3DBlob*, const std::wstring&, const std::string&, Type);
 
 };
 
