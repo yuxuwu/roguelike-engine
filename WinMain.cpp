@@ -13,22 +13,22 @@
 #include <iostream>
 
 
+static void CreateConsoleForOutput();
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 {
-	// Create and redirect output to console
-	AllocConsole();
-	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-	HWND console_hwnd = GetConsoleWindow();
+	CreateConsoleForOutput();
 
 
 	GameWindow gameWindow;
-	gameWindow.setupWindow(hInstance);
+	gameWindow.registerAndCreateWindow(hInstance);
 	HWND hwnd = gameWindow.getWindowHandler();
 
 	GameGraphics gameGraphics;
 	gameGraphics.setupGraphics(hwnd);
 
-	gameGraphics.loadAndCompileShader();
+	gameGraphics.loadAndCompileTestShader();
 
 	ShowWindow(hwnd, nCmdShow);
 
@@ -78,4 +78,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void CreateConsoleForOutput() {
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout); // redirect stdout to console
+	HWND console_hwnd = GetConsoleWindow();
 }
