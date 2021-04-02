@@ -6,7 +6,8 @@
 #endif
 
 #include "GameGraphics.h"
-#include "utils/WindowsErrorHandling.h"
+#include "error_handling/WindowsErrorHandling.h"
+#include "graphics/Shader.h"
 
 #include <windows.h>
 
@@ -93,6 +94,7 @@ void GameGraphics::_clearRenderingTarget() {
 
 void GameGraphics::loadAndCompileTestShader() {
 	/*
+	Shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPS;
 	_d3dDevice->CreateVertexShader(

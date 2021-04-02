@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../utils/FileHandling.h"
+#include "../error_handling/FileHandling.h"
 #include "../DungeonMap.h"
 
 #include <string>

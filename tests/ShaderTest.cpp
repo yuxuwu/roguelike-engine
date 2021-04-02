@@ -25,7 +25,7 @@ ShaderCompileResult compileFragShader(linkToShaderFile);
 ShaderCompileResult compileShader(linkToShaderFile);
 
 ShaderProgramResult loadShaderProgram(vertexObject, fragObject);
-ShaderProgramResult loadShaderProgram(linkToVertexShader, linkToFramShader);
+ShaderProgramResult loadShaderProgram(linkToVertexShader, linkToFrameShader);
 */
 
 /// Compiled Shader code to blob
@@ -40,17 +40,13 @@ ShaderProgramResult loadShaderProgram(linkToVertexShader, linkToFramShader);
 
 
 TEST (ShaderCompile, ReturnsSuccessOnValidFile) {
-	ID3DBlob* shader = nullptr;
-
-	Shader::ShaderCompileResult result = Shader::Compile(shader, L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
-	EXPECT_EQ(result.status, Shader::ShaderCompileResult::Status::SUCCESS);
-	EXPECT_EQ(result.message, "");
+	Shader shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
+	EXPECT_EQ(shader.getCompileResult().status, Shader::ShaderCompileResult::Status::SUCCESS);
+	EXPECT_EQ(shader.getCompileResult().message, "");
 }
 
 TEST (ShaderCompile, ReturnsFailureOnInvalidFilepath) {
-	ID3DBlob* shader = nullptr;
-
-	Shader::ShaderCompileResult result = Shader::Compile(shader, L"testfiles/syntax_error.shader", "VShader", Shader::Type::Vertex);
-	EXPECT_EQ(result.status, Shader::ShaderCompileResult::Status::FAILURE);
-	EXPECT_NE(result.message, "");
+	Shader shader(L"testfiles/syntax_error.shader", "VShader", Shader::Type::Vertex);
+	EXPECT_EQ(shader.getCompileResult().status, Shader::ShaderCompileResult::Status::FAILURE);
+	EXPECT_NE(shader.getCompileResult().message, "");
 }

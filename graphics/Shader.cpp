@@ -1,15 +1,28 @@
 #include "Shader.h"
 #include <sstream>
-#include "../utils/WindowsErrorHandling.h"
+#include "../error_handling/WindowsErrorHandling.h"
 
 static std::string ParseStringFromErrorBlob(ID3DBlob *errorBlob);
 static std::string GetCompilationTarget(Shader::Type type);
 static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob* compileErrors);
 static std::string CreateShaderCompileMessage(ID3DBlob* compileErrors);
 
+
+/*
+ * =====================================================
+ * Shader
+ * =====================================================
+ */
+Shader::Shader(const std::wstring &filepath, const std::string &entrypoint, Shader::Type shaderType) {
+	ShaderCompileResult tempCompResult = this->Compile(filepath, entrypoint, shaderType);
+	this->compile_result = tempCompResult;
+}
+
+
 // TODO: Don't feel like passing in a shader blob object, should create one and return it
-Shader::ShaderCompileResult Shader::Compile(ID3DBlob* shader, const std::wstring& filepath, const std::string& entrypoint, Shader::Type shaderType) {
+Shader::ShaderCompileResult Shader::Compile(const std::wstring& filepath, const std::string& entrypoint, Shader::Type shaderType) {
 	ID3DBlob *compileErrors = nullptr;
+	ID3DBlob *shader = nullptr;
 	DEBUG_HR(
 		D3DCompileFromFile(
 				filepath.c_str(),                         // filename
@@ -25,6 +38,7 @@ Shader::ShaderCompileResult Shader::Compile(ID3DBlob* shader, const std::wstring
 
 	return CreateShaderCompileResult(compileErrors);
 }
+
 
 static std::string ParseStringFromErrorBlob(ID3DBlob *errorBlob) {
 	std::string result = (char*)errorBlob->GetBufferPointer();

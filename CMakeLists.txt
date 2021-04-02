@@ -12,8 +12,8 @@ set(SOURCE_FILES
 
         DungeonMap.cpp
 
-        utils/FileHandling.cpp
-        utils/WindowsErrorHandling.cpp
+        error_handling/FileHandling.cpp
+        error_handling/WindowsErrorHandling.cpp
 
         graphics/Shader.cpp
         )
