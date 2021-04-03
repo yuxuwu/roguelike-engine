@@ -2,10 +2,10 @@
 #include <sstream>
 #include "../error_handling/WindowsErrorHandling.h"
 
-static std::string ParseStringFromErrorBlob(ID3DBlob *errorBlob);
-static std::string GetCompilationTarget(Shader::Type type);
-static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob* compileErrors);
-static std::string CreateShaderCompileMessage(ID3DBlob* compileErrors);
+static std::string ParseStringFromErrorBlob(ID3DBlob *);
+static std::string GetCompilationTarget(Shader::Type);
+static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob*, ID3DBlob*);
+static std::string CreateShaderCompileMessage(ID3DBlob*);
 
 
 /*
@@ -36,7 +36,7 @@ Shader::ShaderCompileResult Shader::Compile(const std::wstring& filepath, const 
 				&compileErrors)                           // p to error msgs, NULL if no errors (optional)
 	);
 
-	return CreateShaderCompileResult(compileErrors);
+	return CreateShaderCompileResult(shader, compileErrors);
 }
 
 
@@ -50,7 +50,7 @@ static std::string GetCompilationTarget(Shader::Type type) {
 		case Shader::Type::Vertex: {
 			return "vs_4_0";
 		}
-		case Shader::Type::Fragment: {
+		case Shader::Type::Pixel: {
 			return "ps_4_0";
 		}
 		default: {
@@ -59,13 +59,13 @@ static std::string GetCompilationTarget(Shader::Type type) {
 	}
 }
 
-static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob* compileErrors) {
+static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob* compiledShaderBlob, ID3DBlob* compileErrors) {
 	std::string compileErrorMessage = CreateShaderCompileMessage(compileErrors);
 
 	if (empty(compileErrorMessage)) {
-		return {Shader::ShaderCompileResult::Status::SUCCESS, ""};
+		return {compiledShaderBlob, Shader::ShaderCompileResult::Status::SUCCESS, ""};
 	}
-	return {Shader::ShaderCompileResult::Status::FAILURE, compileErrorMessage};
+	return {nullptr, Shader::ShaderCompileResult::Status::FAILURE, compileErrorMessage};
 }
 
 static std::string CreateShaderCompileMessage(ID3DBlob* compileErrors) {

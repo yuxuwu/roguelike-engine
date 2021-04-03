@@ -93,17 +93,21 @@ void GameGraphics::_clearRenderingTarget() {
 
 
 void GameGraphics::loadAndCompileTestShader() {
+	Shader vertShader = Shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
+	Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::Type::Pixel);
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> VS;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> PS;
+
+
 	/*
-	Shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVS;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPS;
 	_d3dDevice->CreateVertexShader(
 		VS->GetBufferPointer(),
 		VS->GetBufferSize(),
 		NULL,
-		pVS.GetAddressOf()
+		VS.GetAddressOf()
 	);
-	_d3dDevice->CreatePixelShader(
+	 _d3dDevice->CreatePixelShader(
 		PS->GetBufferPointer(),
 		PS->GetBufferSize(),
 		NULL,
