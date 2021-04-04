@@ -37,22 +37,22 @@ void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 	swapChainDesc.OutputWindow = hwnd;
 
 	DEBUG_HR(
-			//OPT: Creating device and swap chain recreates device resources
-			//     for the swap chain, more efficient to create separately from
-			//     device itself.
+	//OPT: Creating device and swap chain recreates device resources
+	//     for the swap chain, more efficient to create separately from
+	//     device itself.
 			D3D11CreateDeviceAndSwapChain(
-				nullptr,                  //Pointer to: Video Adapter, null being default adapter
-				D3D_DRIVER_TYPE_HARDWARE, //Driver Type
-				0,                        //Software Rasterizer
-				deviceFlags,              //Flags
-				_levels,                  //Feature levels
-				ARRAYSIZE(_levels),       //Number Feature Levels given
-				D3D11_SDK_VERSION,        //SDK Version
-				&swapChainDesc,           //Pointer to: Swap Chain Desc
-				&(_d3dSwapChain),         //Pointer to Output: Swap Chain
-				&(_d3dDevice),            //Pointer to Output: D3D Device
-				&(_d3dFeatureLevel),      //Pointer to Output: Determined Feature Level
-				&(_d3dContext)            //Pointer to Output: D3D Device Context
+					nullptr,                  //Pointer to: Video Adapter, null being default adapter
+					D3D_DRIVER_TYPE_HARDWARE, //Driver Type
+					0,                        //Software Rasterizer
+					deviceFlags,              //Flags
+					_levels,                  //Feature levels
+					ARRAYSIZE(_levels),       //Number Feature Levels given
+					D3D11_SDK_VERSION,        //SDK Version
+					&swapChainDesc,           //Pointer to: Swap Chain Desc
+					&(_d3dSwapChain),         //Pointer to Output: Swap Chain
+					&(_d3dDevice),            //Pointer to Output: D3D Device
+					&(_d3dFeatureLevel),      //Pointer to Output: Determined Feature Level
+					&(_d3dContext)            //Pointer to Output: D3D Device Context
 			)
 	);
 }
@@ -78,38 +78,74 @@ void GameGraphics::_setupViewport() {
 
 void GameGraphics::renderFrame() {
 	_clearRenderingTarget();
-
 	_d3dSwapChain->Present(0, 0);
 }
 
 void GameGraphics::_clearRenderingTarget() {
 	float color[4] = {0.0f, 0.2f, 0.4f, 1.0f};
 	_d3dContext->ClearRenderTargetView(_backBuffer.Get(), color);
-
 }
 
 void GameGraphics::loadAndCompileTestShader() {
+	/// Vertices Part
+	struct VERTEX {
+		float X, Y, Z; // Vertex Position
+	};
+
+	VERTEX OurVertices[] = {
+			{0.0f, 0.5f, 0.0f},
+			{0.45f, -0.5f, 0.0f},
+			{-0.45f, -0.5f, 0.0f}
+	};
+
+	D3D11_BUFFER_DESC bd = {0};
+	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
+	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+	DEBUG_HR(_d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
+
+
+	// Shaders Part
 	Shader vertShader = Shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
-	//Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::Type::Pixel);
+	Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::Type::Pixel);
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> VS;
-	//Microsoft::WRL::ComPtr<ID3D11PixelShader> PS;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> PS;
 
 	DEBUG_HR(_d3dDevice->CreateVertexShader(
-		vertShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
-		vertShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
-		nullptr,
-		VS.GetAddressOf()
+			vertShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
+			vertShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
+			nullptr,
+			VS.GetAddressOf()
 	));
-	/*
 	DEBUG_HR(_d3dDevice->CreatePixelShader(
-	   pixShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
-	   pixShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
-	   nullptr,
-	   PS.GetAddressOf()
-   ));
+			pixShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
+			pixShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
+			nullptr,
+			PS.GetAddressOf()
+	));
+	_d3dContext->VSSetShader(VS.Get(), 0, 0);
+	_d3dContext->PSSetShader(PS.Get(), 0, 0);
 
-   _d3dContext->VSSetShader(pVS.Get(), 0, 0);
-   _d3dContext->PSSetShader(pPS.Get(), 0, 0);
-	*/
+	/// Vertex Input Layout
+	// Input Element One: Position
+	D3D11_INPUT_ELEMENT_DESC ied[] = {
+			{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+	/*
+	ied.SemanticName = "Position";
+	ied.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	ied.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	 */
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+	DEBUG_HR(_d3dDevice->CreateInputLayout(
+			ied,
+			ARRAYSIZE(ied),
+			vertShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
+			vertShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
+			&inputLayout
+	));
 }
