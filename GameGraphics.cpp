@@ -13,8 +13,6 @@
 
 #include <iostream>
 
-
-
 void GameGraphics::setupGraphics(const HWND& hwnd) {
 	_setupD3DDeviceAndSwapChain(hwnd);
 	_setupRenderTargets();
@@ -43,18 +41,18 @@ void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 			//     for the swap chain, more efficient to create separately from
 			//     device itself.
 			D3D11CreateDeviceAndSwapChain(
-					nullptr,
-					D3D_DRIVER_TYPE_HARDWARE,
-					0,
-					deviceFlags,
-					_levels,
-					ARRAYSIZE(_levels),
-					D3D11_SDK_VERSION,
-					&swapChainDesc,
-					&(_d3dSwapChain),
-					&(_d3dDevice),
-					&(_d3dFeatureLevel),
-					&(_d3dContext)
+				nullptr,                  //Pointer to: Video Adapter, null being default adapter
+				D3D_DRIVER_TYPE_HARDWARE, //Driver Type
+				0,                        //Software Rasterizer
+				deviceFlags,              //Flags
+				_levels,                  //Feature levels
+				ARRAYSIZE(_levels),       //Number Feature Levels given
+				D3D11_SDK_VERSION,        //SDK Version
+				&swapChainDesc,           //Pointer to: Swap Chain Desc
+				&(_d3dSwapChain),         //Pointer to Output: Swap Chain
+				&(_d3dDevice),            //Pointer to Output: D3D Device
+				&(_d3dFeatureLevel),      //Pointer to Output: Determined Feature Level
+				&(_d3dContext)            //Pointer to Output: D3D Device Context
 			)
 	);
 }
@@ -90,31 +88,28 @@ void GameGraphics::_clearRenderingTarget() {
 
 }
 
-
-
 void GameGraphics::loadAndCompileTestShader() {
 	Shader vertShader = Shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
-	Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::Type::Pixel);
+	//Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::Type::Pixel);
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> VS;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> PS;
+	//Microsoft::WRL::ComPtr<ID3D11PixelShader> PS;
 
-
-	/*
-	_d3dDevice->CreateVertexShader(
-		VS->GetBufferPointer(),
-		VS->GetBufferSize(),
-		NULL,
+	DEBUG_HR(_d3dDevice->CreateVertexShader(
+		vertShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
+		vertShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
+		nullptr,
 		VS.GetAddressOf()
-	);
-	 _d3dDevice->CreatePixelShader(
-		PS->GetBufferPointer(),
-		PS->GetBufferSize(),
-		NULL,
-		pPS.GetAddressOf()
-	);
+	));
+	/*
+	DEBUG_HR(_d3dDevice->CreatePixelShader(
+	   pixShader.getCompileResult().compiledShaderBlob->GetBufferPointer(),
+	   pixShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
+	   nullptr,
+	   PS.GetAddressOf()
+   ));
 
-	_d3dContext->VSSetShader(pVS.Get(), 0, 0);
-	_d3dContext->PSSetShader(pPS.Get(), 0, 0);
-	 */
+   _d3dContext->VSSetShader(pVS.Get(), 0, 0);
+   _d3dContext->PSSetShader(pPS.Get(), 0, 0);
+	*/
 }

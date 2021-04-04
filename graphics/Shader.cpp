@@ -8,11 +8,6 @@ static Shader::ShaderCompileResult CreateShaderCompileResult(ID3DBlob*, ID3DBlob
 static std::string CreateShaderCompileMessage(ID3DBlob*);
 
 
-/*
- * =====================================================
- * Shader
- * =====================================================
- */
 Shader::Shader(const std::wstring &filepath, const std::string &entrypoint, Shader::Type shaderType) {
 	ShaderCompileResult tempCompResult = this->Compile(filepath, entrypoint, shaderType);
 	this->compile_result = tempCompResult;

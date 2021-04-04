@@ -23,7 +23,7 @@ TEST_F (ShaderSuccessTest, ReturnsSuccessOnValidFile) {
 }
 
 TEST_F (ShaderSuccessTest, HasNonNullShaderBlobOnSuccess) {
-	EXPECT_NE(shaderSuccess->getCompileResult().compiledShaderBlob, nullptr);
+	EXPECT_NE(shaderSuccess->getCompileResult().compiledShaderBlob->GetBufferPointer(), nullptr);
 }
 
 TEST_F (ShaderFailureTest, ReturnsFailureOnInvalidFilepath) {
