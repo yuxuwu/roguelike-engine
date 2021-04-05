@@ -16,7 +16,7 @@
 void GameGraphics::setupGraphics(const HWND& hwnd) {
 	_setupD3DDeviceAndSwapChain(hwnd);
 	_setupRenderTargets();
-	_setupViewport();
+	_setupViewport(nullptr);
 }
 
 void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
@@ -64,7 +64,7 @@ void GameGraphics::_setupRenderTargets() {
 	_d3dContext->OMSetRenderTargets(1, _backBuffer.GetAddressOf(), NULL);
 }
 
-void GameGraphics::_setupViewport() {
+void GameGraphics::_setupViewport(const HWND &hwnd) {
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
@@ -76,9 +76,25 @@ void GameGraphics::_setupViewport() {
 	_d3dContext->RSSetViewports(1, &viewport);
 }
 
+/// Vertices Part
+struct VERTEX {
+	float X, Y, Z; // Vertex Position
+};
+Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+
 void GameGraphics::renderFrame() {
+	_d3dContext->OMSetRenderTargets(1, _backBuffer.GetAddressOf(), nullptr);
 	_clearRenderingTarget();
-	_d3dSwapChain->Present(0, 0);
+	// Vertex Buffer
+	UINT stride = sizeof(VERTEX);
+	UINT offset = 0;
+	_d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+
+	_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	_d3dContext->Draw(3, 0);
+
+	_d3dSwapChain->Present(1, 0);
 }
 
 void GameGraphics::_clearRenderingTarget() {
@@ -87,24 +103,6 @@ void GameGraphics::_clearRenderingTarget() {
 }
 
 void GameGraphics::loadAndCompileTestShader() {
-	/// Vertices Part
-	struct VERTEX {
-		float X, Y, Z; // Vertex Position
-	};
-
-	VERTEX OurVertices[] = {
-			{0.0f, 0.5f, 0.0f},
-			{0.45f, -0.5f, 0.0f},
-			{-0.45f, -0.5f, 0.0f}
-	};
-
-	D3D11_BUFFER_DESC bd = {0};
-	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	DEBUG_HR(_d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
 
 
 	// Shaders Part
@@ -126,20 +124,21 @@ void GameGraphics::loadAndCompileTestShader() {
 			nullptr,
 			PS.GetAddressOf()
 	));
+	if(vertShader.getCompileResult().status == Shader::ShaderCompileResult::Status::FAILURE) {
+		std::cout << vertShader.getCompileResult().message << std::endl;
+	}
+	if(pixShader.getCompileResult().status == Shader::ShaderCompileResult::Status::FAILURE) {
+		std::cout << pixShader.getCompileResult().message << std::endl;
+	}
 	_d3dContext->VSSetShader(VS.Get(), 0, 0);
+
 	_d3dContext->PSSetShader(PS.Get(), 0, 0);
 
 	/// Vertex Input Layout
 	// Input Element One: Position
 	D3D11_INPUT_ELEMENT_DESC ied[] = {
-			{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"Color", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+			{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
-	/*
-	ied.SemanticName = "Position";
-	ied.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	ied.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	 */
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 	DEBUG_HR(_d3dDevice->CreateInputLayout(
 			ied,
@@ -148,4 +147,21 @@ void GameGraphics::loadAndCompileTestShader() {
 			vertShader.getCompileResult().compiledShaderBlob->GetBufferSize(),
 			&inputLayout
 	));
+	_d3dContext->IASetInputLayout(inputLayout.Get());
+
+
+	VERTEX OurVertices[] = {
+			{0.0f, 0.5f, 0.0f},
+			{0.45f, -0.5f, 0.0f},
+			{-0.45f, -0.5f, 0.0f}
+	};
+
+	D3D11_BUFFER_DESC bd = {0};
+	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
+	DEBUG_HR(_d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
+
+
 }

@@ -50,6 +50,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 			// Update the scene
 			gameGraphics.renderFrame();
 			// Render during idle time (when no window messages are waiting)
+			//std::cout << "frame " << std::endl;
 			// Present frame to screen
 		}
 	}

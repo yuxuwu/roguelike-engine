@@ -38,7 +38,7 @@ public:
 private:
 	void _setupD3DDeviceAndSwapChain(const HWND &hwnd);
 	void _setupRenderTargets();
-	void _setupViewport();
+	void _setupViewport(const HWND& hwnd);
 	void _clearRenderingTarget();
 private:
 	D3D_FEATURE_LEVEL _d3dFeatureLevel;
