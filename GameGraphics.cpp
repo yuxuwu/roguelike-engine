@@ -16,7 +16,7 @@
 void GameGraphics::setupGraphics(const HWND& hwnd) {
 	_setupD3DDeviceAndSwapChain(hwnd);
 	_setupRenderTargets();
-	_setupViewport(nullptr);
+	_setupViewport(hwnd);
 }
 
 void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
@@ -68,10 +68,15 @@ void GameGraphics::_setupViewport(const HWND &hwnd) {
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
+	RECT rect{};
+	GetWindowRect(hwnd, &rect);
+
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = 800;
-	viewport.Height = 600;
+	viewport.Width = rect.right - rect.left;
+	viewport.Height = rect.bottom - rect.top;
+
+	std::cout << "Width: " << viewport.Width << " Height: " << viewport.Height << std::endl;
 
 	_d3dContext->RSSetViewports(1, &viewport);
 }
@@ -137,7 +142,7 @@ void GameGraphics::loadAndCompileTestShader() {
 	/// Vertex Input Layout
 	// Input Element One: Position
 	D3D11_INPUT_ELEMENT_DESC ied[] = {
-			{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+			{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 	DEBUG_HR(_d3dDevice->CreateInputLayout(
