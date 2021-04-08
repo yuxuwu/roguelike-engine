@@ -9,10 +9,6 @@
 #include "error_handling/WindowsErrorHandling.h"
 #include "graphics/Shader.h"
 
-#include <windows.h>
-
-#include <iostream>
-
 void GameGraphics::setupGraphics(const HWND& hwnd) {
 	_setupD3DDeviceAndSwapChain(hwnd);
 	_setupRenderTargets();
@@ -42,7 +38,7 @@ void GameGraphics::_setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 	//     device itself.
 			D3D11CreateDeviceAndSwapChain(
 					nullptr,                  //Pointer to: Video Adapter, null being default adapter
-					D3D_DRIVER_TYPE_HARDWARE, //Driver Type
+					D3D_DRIVER_TYPE_HARDWARE, //Driver ShaderType
 					0,                        //Software Rasterizer
 					deviceFlags,              //Flags
 					_levels,                  //Feature levels
@@ -108,11 +104,10 @@ void GameGraphics::_clearRenderingTarget() {
 }
 
 void GameGraphics::loadAndCompileTestShader() {
-
-
 	// Shaders Part
-	Shader vertShader = Shader(L"testfiles/shaders.shader", "VShader", Shader::Type::Vertex);
-	Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::Type::Pixel);
+	/*
+	Shader vertShader = Shader(L"testfiles/shaders.shader", "VShader", Shader::ShaderType::Vertex, this->_d3dDevice);
+	Shader pixShader = Shader(L"testfiles/shaders.shader", "PShader", Shader::ShaderType::Pixel, this->_d3dDevice);
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> VS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> PS;
@@ -139,6 +134,19 @@ void GameGraphics::loadAndCompileTestShader() {
 
 	_d3dContext->PSSetShader(PS.Get(), 0, 0);
 
+	VERTEX OurVertices[] = {
+			{0.0f, 0.5f, 0.0f},
+			{0.45f, -0.5f, 0.0f},
+			{-0.45f, -0.5f, 0.0f}
+	};
+
+	D3D11_BUFFER_DESC bd = {0};
+	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
+	DEBUG_HR(_d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
+
 	/// Vertex Input Layout
 	// Input Element One: Position
 	D3D11_INPUT_ELEMENT_DESC ied[] = {
@@ -153,20 +161,5 @@ void GameGraphics::loadAndCompileTestShader() {
 			&inputLayout
 	));
 	_d3dContext->IASetInputLayout(inputLayout.Get());
-
-
-	VERTEX OurVertices[] = {
-			{0.0f, 0.5f, 0.0f},
-			{0.45f, -0.5f, 0.0f},
-			{-0.45f, -0.5f, 0.0f}
-	};
-
-	D3D11_BUFFER_DESC bd = {0};
-	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
-	DEBUG_HR(_d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
-
-
+	 */
 }

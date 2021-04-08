@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 
 
 set(SOURCE_FILES
+        pch.cpp
+
         WinMain.cpp
         GameWindow.cpp
         GameGraphics.cpp

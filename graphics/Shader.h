@@ -1,10 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <string>
 
-#include <d3dcompiler.h>
-#pragma comment(lib, "d3dcompiler.lib")
+#include "../pch.h"
 
 class Shader {
 public:

@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include "../pch.h"
+
 #include "../graphics/Shader.h"
 
 
@@ -30,4 +32,3 @@ TEST_F (ShaderFailureTest, ReturnsFailureOnInvalidFilepath) {
 	EXPECT_EQ(shaderFailed->getCompileResult().status, Shader::ShaderCompileResult::Status::FAILURE);
 	EXPECT_NE(shaderFailed->getCompileResult().message, "");
 }
-

@@ -2,16 +2,13 @@
 #define UNICODE
 #endif
 
-#include <windows.h>
 #include <cstdio>
 
-#pragma comment(lib, "d3d11.lib")
+
+#include "pch.h"
 
 #include "GameWindow.h"
 #include "GameGraphics.h"
-
-#include <iostream>
-
 
 static void CreateConsoleForOutput();
 
