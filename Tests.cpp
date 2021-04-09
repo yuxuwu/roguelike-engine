@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../error_handling/FileHandling.h"
-#include "../DungeonMap.h"
+#include "error_handling/FileHandling.h"
+#include "DungeonMap.h"
 
 #include <string>
 #include <vector>

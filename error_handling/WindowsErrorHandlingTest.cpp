@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../error_handling/WindowsErrorHandling.h"
+#include "WindowsErrorHandling.h"
 
 using ::testing::HasSubstr;
 using namespace WindowsErrorHandling;

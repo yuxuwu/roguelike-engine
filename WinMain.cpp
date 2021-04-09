@@ -8,7 +8,7 @@
 #include "pch.h"
 
 #include "GameWindow.h"
-#include "GameGraphics.h"
+#include "graphics/GameGraphics.h"
 
 static void CreateConsoleForOutput();
 
@@ -23,7 +23,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR pCmdLine, int nCmdShow)
 	HWND hwnd = gameWindow.getWindowHandler();
 
 	GameGraphics gameGraphics;
-	gameGraphics.setupGraphics(hwnd);
+	gameGraphics.Init(hwnd);
 
 	gameGraphics.loadAndCompileTestShader();
 
