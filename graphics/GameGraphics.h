@@ -48,6 +48,8 @@ public:
 
 	VertexShaderCreateResult CreateVertexShader(const std::wstring&, const std::string&);
 	PixelShaderCreateResult CreatePixelShader(const std::wstring&, const std::string&);
+	void SetVertexShader(const ComPtr<ID3D11VertexShader>&);
+	void SetPixelShader(const ComPtr<ID3D11PixelShader>&);
 
 private:
 	void setupD3DDeviceAndSwapChain(const HWND &hwnd);
