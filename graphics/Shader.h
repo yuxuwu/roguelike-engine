@@ -9,16 +9,17 @@ struct ShaderCompileResult {
 };
 
 struct VertexShader {
-	VertexShader(const ComPtr<ID3D11Device>&, const std::wstring&, const std::string&);
-	void Set(ComPtr<ID3D11DeviceContext>);
+	VertexShader(const ComPtr<ID3D11Device>&, const std::wstring&, const std::string&, D3D11_INPUT_ELEMENT_DESC [], UINT);
+	void Set(const ComPtr<ID3D11DeviceContext>&) const;
 
 	ShaderCompileResult compile_result;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> p_shader;
+	ComPtr<ID3D11VertexShader> p_shader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> p_input_layout;
 };
 
 struct PixelShader {
 	PixelShader(const ComPtr<ID3D11Device>&, const std::wstring&, const std::string&);
-	void Set(ComPtr<ID3D11DeviceContext>);
+	void Set(const ComPtr<ID3D11DeviceContext>&) const;
 
 	ShaderCompileResult compile_result;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> p_shader;

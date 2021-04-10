@@ -5,9 +5,9 @@ static std::string CreateShaderCompileMessage(ID3DBlob*);
 static std::string ParseStringFromErrorBlob(ID3DBlob*);
 
 
-VertexShader::VertexShader(const ComPtr<ID3D11Device>& d3dDevice, const std::wstring& filepath, const std::string& entrypoint) {
+VertexShader::VertexShader(const ComPtr<ID3D11Device>& d3dDevice, const std::wstring& filepath, const std::string& entrypoint, D3D11_INPUT_ELEMENT_DESC ied[], UINT numIed) {
 	ID3DBlob *compileErrors = nullptr;
-	// Compile Shader
+	/// Compile Shader
 	DEBUG_HR(
 			D3DCompileFromFile(
 					filepath.c_str(),                                 // filename
@@ -23,7 +23,7 @@ VertexShader::VertexShader(const ComPtr<ID3D11Device>& d3dDevice, const std::wst
 
 	this->compile_result.message = CreateShaderCompileMessage(compileErrors);
 
-	// Create Shader
+	/// Create Shader
 	DEBUG_HR(d3dDevice->CreateVertexShader(
 			this->compile_result.compiled_shaderblob->GetBufferPointer(),
 			this->compile_result.compiled_shaderblob->GetBufferSize(),
@@ -33,11 +33,24 @@ VertexShader::VertexShader(const ComPtr<ID3D11Device>& d3dDevice, const std::wst
 
 	if(!this->compile_result.message.empty())
 		std::cout << "SHADER COMPILE ERROR: " << this->compile_result.message << std::endl;
+
+
+	/// Vertex Input Layout
+	DEBUG_HR(d3dDevice->CreateInputLayout(
+			ied,
+			numIed,
+			this->compile_result.compiled_shaderblob->GetBufferPointer(),
+			this->compile_result.compiled_shaderblob->GetBufferSize(),
+			&this->p_input_layout
+	));
 }
 
-void VertexShader::Set(ComPtr<ID3D11DeviceContext> d3dContext) {
+void VertexShader::Set(const ComPtr<ID3D11DeviceContext>& d3dContext) const {
+	d3dContext->IASetInputLayout(this->p_input_layout.Get());
 	d3dContext->VSSetShader(this->p_shader.Get(), nullptr, 0);
 }
+
+
 
 PixelShader::PixelShader(const ComPtr<ID3D11Device>& d3dDevice, const std::wstring& filepath, const std::string& entrypoint) {
 
@@ -68,7 +81,7 @@ PixelShader::PixelShader(const ComPtr<ID3D11Device>& d3dDevice, const std::wstri
 		std::cout << "SHADER COMPILE ERROR: " << this->compile_result.message << std::endl;
 }
 
-void PixelShader::Set(ComPtr<ID3D11DeviceContext> d3dContext) {
+void PixelShader::Set(const ComPtr<ID3D11DeviceContext>& d3dContext) const {
 	d3dContext->PSSetShader(this->p_shader.Get(), nullptr, 0);
 }
 

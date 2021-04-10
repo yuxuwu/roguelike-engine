@@ -85,32 +85,6 @@ void GameGraphics::setupViewport(const HWND &hwnd) {
  *************************************************************************/
 
 
-
-/*************************************************************************
- * SHADERS START
- *************************************************************************/
-
-
-
-
-/*************************************************************************
- * SHADERS END
- *************************************************************************/
-
-
-
-/*************************************************************************
- * VERTEX START
- *************************************************************************/
-struct VERTEX {
-	float X, Y, Z; // Vertex Position
-};
-/*************************************************************************
- * VERTEX END
- *************************************************************************/
-
-
-
 /*************************************************************************
  * RENDERING START
  *************************************************************************/
@@ -135,15 +109,18 @@ void GameGraphics::clearRenderingTarget() {
 	d3dContext->ClearRenderTargetView(backBuffer.Get(), color);
 }
 /*************************************************************************
- * RENDERING START
+ * RENDERING SEND
  *************************************************************************/
 
 
 
 void GameGraphics::loadAndCompileTestShader() {
 
+	D3D11_INPUT_ELEMENT_DESC ied[] = {
+			{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
 	// Load Shaders
-	VertexShader vertShader = VertexShader(this->d3dDevice, L"testfiles/shaders.shader", "VShader");
+	VertexShader vertShader = VertexShader(this->d3dDevice, L"testfiles/shaders.shader", "VShader", ied, 1);
 	PixelShader pixShader = PixelShader(this->d3dDevice, L"testfiles/shaders.shader", "PShader");
 	vertShader.Set(this->d3dContext);
 	pixShader.Set(this->d3dContext);
@@ -155,6 +132,7 @@ void GameGraphics::loadAndCompileTestShader() {
 			{-0.45f, -0.5f, 0.0f}
 	};
 
+
 	// Create Vertex Buffer
 	D3D11_BUFFER_DESC bd = {0};
 	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
@@ -164,9 +142,7 @@ void GameGraphics::loadAndCompileTestShader() {
 
 	/// Vertex Input Layout
 	// Create Vertex Input Layout
-	D3D11_INPUT_ELEMENT_DESC ied[] = {
-			{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
+
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 	DEBUG_HR(d3dDevice->CreateInputLayout(
 			ied,

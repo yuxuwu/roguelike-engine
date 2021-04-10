@@ -12,7 +12,6 @@
 struct RenderingTarget {
 	VertexShader vertex_shader;
 	PixelShader pixel_shader;
-	VerticesSpec vertices_spec;
 	VertexBuffer vertex_buffer;
 	void Set(const ComPtr<ID3D11DeviceContext>&);
 };
