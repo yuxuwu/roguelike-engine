@@ -1,3 +1,6 @@
+#ifndef ROGUELIKE_ENGINE_WINDOWSERRORHANDLING_H
+#define ROGUELIKE_ENGINE_WINDOWSERRORHANDLING_H
+
 #ifndef UNICODE
 #define UNICODE
 #endif
@@ -34,3 +37,5 @@ namespace WindowsErrorHandling {
 	 */
 	ComStatus GetHRStatus(HRESULT hr);
 }
+
+#endif // ROGUELIKE_ENGINE_WINDOWSERRORHANDLING_H

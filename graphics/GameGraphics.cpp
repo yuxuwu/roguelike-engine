@@ -6,7 +6,6 @@
 #endif
 
 #include "GameGraphics.h"
-#include "../error_handling/WindowsErrorHandling.h"
 
 void GameGraphics::Init(const HWND& hwnd) {
 	setupD3DDeviceAndSwapChain(hwnd);
@@ -90,96 +89,10 @@ void GameGraphics::setupViewport(const HWND &hwnd) {
 /*************************************************************************
  * SHADERS START
  *************************************************************************/
-static std::string ParseStringFromErrorBlob(ID3DBlob *errorBlob) {
-	return (char*)errorBlob->GetBufferPointer();
-}
-
-static std::string CreateShaderCompileMessage(ID3DBlob* compileErrors) {
-	std::string result{};
-
-	if(compileErrors) {
-		result = "A compile error was found for the shader: " +
-				 ParseStringFromErrorBlob(compileErrors);
-		compileErrors->Release();
-	}
-	return result;
-}
 
 
-VertexShaderCreateResult GameGraphics::CreateVertexShader(const std::wstring& filepath, const std::string& entrypoint) {
-
-	VertexShaderCreateResult result;
-
-	ID3DBlob *compileErrors = nullptr;
-	DEBUG_HR(
-			D3DCompileFromFile(
-					filepath.c_str(),                                 // filename
-					nullptr,                                          // define shader macros (optional)
-					nullptr,                                          // shader include files (optional)
-					entrypoint.c_str(),                               // shader entry point function
-					"vs_4_0", // compilation target
-					0,                                                // compile options bitfield (optional)
-					0,                                                // compile options 2 bitfield (optional)
-					&result.compile_result.compiledShaderBlob,  // p to compiled code
-					&compileErrors)                                   // p to error msgs, NULL if no errors (optional)
-	);
-
-	result.compile_result.message = CreateShaderCompileMessage(compileErrors);
 
 
-	DEBUG_HR(d3dDevice->CreateVertexShader(
-			result.compile_result.compiledShaderBlob->GetBufferPointer(),
-			result.compile_result.compiledShaderBlob->GetBufferSize(),
-			nullptr,
-			result.shader_object.GetAddressOf()
-	));
-
-	if(!result.compile_result.message.empty())
-		std::cout << "SHADER COMPILE ERROR: " << result.compile_result.message << std::endl;
-
-	return result;
-}
-
-PixelShaderCreateResult GameGraphics::CreatePixelShader(const std::wstring& filepath, const std::string& entrypoint) {
-
-	PixelShaderCreateResult result;
-
-	ID3DBlob *compileErrors = nullptr;
-	DEBUG_HR(
-			D3DCompileFromFile(
-					filepath.c_str(),                                 // filename
-					nullptr,                                          // define shader macros (optional)
-					nullptr,                                          // shader include files (optional)
-					entrypoint.c_str(),                               // shader entry point function
-					"ps_4_0", // compilation target
-					0,                                                // compile options bitfield (optional)
-					0,                                                // compile options 2 bitfield (optional)
-					&result.compile_result.compiledShaderBlob,  // p to compiled code
-					&compileErrors)                                   // p to error msgs, NULL if no errors (optional)
-	);
-
-	result.compile_result.message = CreateShaderCompileMessage(compileErrors);
-
-	DEBUG_HR(d3dDevice->CreatePixelShader(
-			result.compile_result.compiledShaderBlob->GetBufferPointer(),
-			result.compile_result.compiledShaderBlob->GetBufferSize(),
-			nullptr,
-			result.shader_object.GetAddressOf()
-	));
-
-	if(!result.compile_result.message.empty())
-		std::cout << "SHADER COMPILE ERROR: " << result.compile_result.message << std::endl;
-
-	return result;
-}
-
-void GameGraphics::SetPixelShader(const ComPtr<ID3D11PixelShader>& pixShader) {
-	d3dContext->PSSetShader(pixShader.Get(), nullptr, 0);
-}
-
-void GameGraphics::SetVertexShader(const ComPtr<ID3D11VertexShader>& vertShader) {
-	d3dContext->VSSetShader(vertShader.Get(), nullptr, 0);
-}
 /*************************************************************************
  * SHADERS END
  *************************************************************************/
@@ -197,8 +110,11 @@ struct VERTEX {
  *************************************************************************/
 
 
-Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 
+/*************************************************************************
+ * RENDERING START
+ *************************************************************************/
+Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 void GameGraphics::renderFrame() {
 	d3dContext->OMSetRenderTargets(1, backBuffer.GetAddressOf(), nullptr);
 	clearRenderingTarget();
@@ -218,30 +134,36 @@ void GameGraphics::clearRenderingTarget() {
 	float color[4] = {0.0f, 0.2f, 0.4f, 1.0f};
 	d3dContext->ClearRenderTargetView(backBuffer.Get(), color);
 }
+/*************************************************************************
+ * RENDERING START
+ *************************************************************************/
+
+
 
 void GameGraphics::loadAndCompileTestShader() {
 
-	VertexShaderCreateResult vertShader = CreateVertexShader(L"testfiles/shaders.shader", "VShader");
-	PixelShaderCreateResult pixShader = CreatePixelShader(L"testfiles/shaders.shader", "PShader");
+	// Load Shaders
+	VertexShader vertShader = VertexShader(this->d3dDevice, L"testfiles/shaders.shader", "VShader");
+	PixelShader pixShader = PixelShader(this->d3dDevice, L"testfiles/shaders.shader", "PShader");
+	vertShader.Set(this->d3dContext);
+	pixShader.Set(this->d3dContext);
 
-	SetPixelShader(pixShader.shader_object);
-	SetVertexShader(vertShader.shader_object);
-
+	// Load Vertex Data
 	VERTEX OurVertices[] = {
 			{0.0f, 0.5f, 0.0f},
 			{0.45f, -0.5f, 0.0f},
 			{-0.45f, -0.5f, 0.0f}
 	};
 
+	// Create Vertex Buffer
 	D3D11_BUFFER_DESC bd = {0};
 	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
 	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
 	DEBUG_HR(d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
 
 	/// Vertex Input Layout
-	// Input Element One: Position
+	// Create Vertex Input Layout
 	D3D11_INPUT_ELEMENT_DESC ied[] = {
 			{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
@@ -249,11 +171,15 @@ void GameGraphics::loadAndCompileTestShader() {
 	DEBUG_HR(d3dDevice->CreateInputLayout(
 			ied,
 			ARRAYSIZE(ied),
-			vertShader.compile_result.compiledShaderBlob->GetBufferPointer(),
-			vertShader.compile_result.compiledShaderBlob->GetBufferSize(),
+			vertShader.compile_result.compiled_shaderblob->GetBufferPointer(),
+			vertShader.compile_result.compiled_shaderblob->GetBufferSize(),
 			&inputLayout
 	));
+
+	// Set Input Layout
+	UINT stride = sizeof(VERTEX);
+	UINT offset = 0;
 	d3dContext->IASetInputLayout(inputLayout.Get());
+	d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+	d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
-
-

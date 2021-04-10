@@ -7,16 +7,17 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES
         pch.cpp
-
         WinMain.cpp
         GameWindow.cpp
-        graphics/GameGraphics.cpp
-
         DungeonMap.cpp
 
+        graphics/GameGraphics.cpp
+        graphics/Shader.cpp
+        graphics/RenderingTarget.cpp
+        graphics/Vertices.cpp
+
         error_handling/FileHandling.cpp
-        error_handling/WindowsErrorHandling.cpp
-        )
+        error_handling/WindowsErrorHandling.cpp)
 add_executable(roguelike_engine WIN32 ${SOURCE_FILES})
 
 

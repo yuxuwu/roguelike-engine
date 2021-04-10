@@ -1,32 +1,11 @@
-//
-// Created by Yu on 1/18/2021.
-//
-
 #ifndef ROGUELIKE_ENGINE_GAMEGRAPHICS_H
 #define ROGUELIKE_ENGINE_GAMEGRAPHICS_H
 
 
 #include "../pch.h"
-
-struct Vertex {
-	FLOAT X, Y, Z;
-	FLOAT Color[3];
-};
-
-struct ShaderCompileResult {
-	ID3D10Blob* compiledShaderBlob;
-	std::string message;
-};
-
-struct VertexShaderCreateResult {
-	ShaderCompileResult compile_result;
-	ComPtr<ID3D11VertexShader> shader_object;
-};
-
-struct PixelShaderCreateResult {
-	ShaderCompileResult compile_result;
-	ComPtr<ID3D11PixelShader> shader_object;
-};
+#include "Shader.h"
+#include "Vertices.h"
+#include "RenderingTarget.h"
 
 class GameGraphics {
 private:
@@ -46,10 +25,6 @@ public:
 	void renderFrame();
 	void loadAndCompileTestShader();
 
-	VertexShaderCreateResult CreateVertexShader(const std::wstring&, const std::string&);
-	PixelShaderCreateResult CreatePixelShader(const std::wstring&, const std::string&);
-	void SetVertexShader(const ComPtr<ID3D11VertexShader>&);
-	void SetPixelShader(const ComPtr<ID3D11PixelShader>&);
 
 private:
 	void setupD3DDeviceAndSwapChain(const HWND &hwnd);

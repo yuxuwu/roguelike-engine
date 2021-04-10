@@ -15,3 +15,5 @@ using Microsoft::WRL::ComPtr;
 
 #include <iostream>
 #include <string>
+
+#include "error_handling/WindowsErrorHandling.h"
