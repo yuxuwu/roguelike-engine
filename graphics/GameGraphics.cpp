@@ -59,9 +59,20 @@ void GameGraphics::setupD3DDeviceAndSwapChain(const HWND &hwnd) {
 void GameGraphics::setupRenderTargets() {
 	Microsoft::WRL::ComPtr<ID3D11Resource> currentBackBuffer;
 
-	d3dSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(currentBackBuffer.ReleaseAndGetAddressOf()));
-	d3dDevice->CreateRenderTargetView(currentBackBuffer.Get(), NULL, backBuffer.ReleaseAndGetAddressOf());
-	d3dContext->OMSetRenderTargets(1, backBuffer.GetAddressOf(), NULL);
+	d3dSwapChain->GetBuffer(
+			0,
+			__uuidof(ID3D11Texture2D),
+			reinterpret_cast<void**>(currentBackBuffer.ReleaseAndGetAddressOf()));
+
+	d3dDevice->CreateRenderTargetView(
+			currentBackBuffer.Get(),
+			nullptr,
+			backBuffer.ReleaseAndGetAddressOf());
+
+	d3dContext->OMSetRenderTargets(
+			1,
+			backBuffer.GetAddressOf(),
+			nullptr);
 }
 
 void GameGraphics::setupViewport(const HWND &hwnd) {
@@ -88,18 +99,14 @@ void GameGraphics::setupViewport(const HWND &hwnd) {
 /*************************************************************************
  * RENDERING START
  *************************************************************************/
-Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 void GameGraphics::renderFrame() {
 	d3dContext->OMSetRenderTargets(1, backBuffer.GetAddressOf(), nullptr);
 	clearRenderingTarget();
-	// Vertex Buffer
-	UINT stride = sizeof(VERTEX);
-	UINT offset = 0;
-	d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 
-	d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	d3dContext->Draw(3, 0);
+	for(auto rt : this->renderingTargets) {
+		rt.Set(this->d3dContext);
+		this->Render(rt);
+	}
 
 	d3dSwapChain->Present(1, 0);
 }
@@ -108,8 +115,13 @@ void GameGraphics::clearRenderingTarget() {
 	float color[4] = {0.0f, 0.2f, 0.4f, 1.0f};
 	d3dContext->ClearRenderTargetView(backBuffer.Get(), color);
 }
+
+void GameGraphics::Render(RenderingTarget renderingTarget) {
+	renderingTarget.Set(this->d3dContext);
+	d3dContext->Draw(3, 0);
+}
 /*************************************************************************
- * RENDERING SEND
+ * RENDERING END
  *************************************************************************/
 
 
@@ -120,10 +132,8 @@ void GameGraphics::loadAndCompileTestShader() {
 			{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	// Load Shaders
-	VertexShader vertShader = VertexShader(this->d3dDevice, L"testfiles/shaders.shader", "VShader", ied, 1);
-	PixelShader pixShader = PixelShader(this->d3dDevice, L"testfiles/shaders.shader", "PShader");
-	vertShader.Set(this->d3dContext);
-	pixShader.Set(this->d3dContext);
+	VertexShader vertShader(this->d3dDevice, L"testfiles/shaders.shader", "VShader", ied, 1);
+	PixelShader pixShader(this->d3dDevice, L"testfiles/shaders.shader", "PShader");
 
 	// Load Vertex Data
 	VERTEX OurVertices[] = {
@@ -131,31 +141,9 @@ void GameGraphics::loadAndCompileTestShader() {
 			{0.45f, -0.5f, 0.0f},
 			{-0.45f, -0.5f, 0.0f}
 	};
-
-
 	// Create Vertex Buffer
-	D3D11_BUFFER_DESC bd = {0};
-	bd.ByteWidth = sizeof(VERTEX) * ARRAYSIZE(OurVertices);
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	D3D11_SUBRESOURCE_DATA srd = {OurVertices, 0, 0};
-	DEBUG_HR(d3dDevice->CreateBuffer(&bd, &srd, &vertexBuffer));
+	VertexBuffer vertBuffer(this->d3dDevice, OurVertices, 3);
 
-	/// Vertex Input Layout
-	// Create Vertex Input Layout
-
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
-	DEBUG_HR(d3dDevice->CreateInputLayout(
-			ied,
-			ARRAYSIZE(ied),
-			vertShader.compile_result.compiled_shaderblob->GetBufferPointer(),
-			vertShader.compile_result.compiled_shaderblob->GetBufferSize(),
-			&inputLayout
-	));
-
-	// Set Input Layout
-	UINT stride = sizeof(VERTEX);
-	UINT offset = 0;
-	d3dContext->IASetInputLayout(inputLayout.Get());
-	d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	RenderingTarget rt{vertShader, pixShader, vertBuffer};
+	this->renderingTargets.emplace_back(rt);
 }

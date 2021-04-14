@@ -2,6 +2,7 @@
 #define ROGUELIKE_ENGINE_GAMEGRAPHICS_H
 
 
+#include <vector>
 #include "../pch.h"
 #include "Shader.h"
 #include "Vertices.h"
@@ -32,12 +33,15 @@ private:
 	void setupViewport(const HWND& hwnd);
 	void clearRenderingTarget();
 private:
+	void Render(RenderingTarget renderingTarget);
+
 	D3D_FEATURE_LEVEL d3dFeatureLevel;
 	Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> d3dSwapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBuffer;
 
+	std::vector<RenderingTarget> renderingTargets;
 };
 
 

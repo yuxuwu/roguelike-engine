@@ -10,10 +10,11 @@
 #include "Vertices.h"
 
 struct RenderingTarget {
+	void Set(const ComPtr<ID3D11DeviceContext>&);
+
 	VertexShader vertex_shader;
 	PixelShader pixel_shader;
 	VertexBuffer vertex_buffer;
-	void Set(const ComPtr<ID3D11DeviceContext>&);
 };
 
 

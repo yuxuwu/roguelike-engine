@@ -15,8 +15,9 @@ struct VertexBuffer {
 
 	ComPtr<ID3D11Buffer> p_buffer;
 	D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	/// TODO: Parameterize below once I get the context of these vars
 	UINT stride = sizeof(VERTEX);
-	UINT offset;
+	UINT offset = 0;
 };
 
 
